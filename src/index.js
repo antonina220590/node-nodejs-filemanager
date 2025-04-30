@@ -1,5 +1,6 @@
 import { argv, stdin as input, stdout as output } from "node:process";
 import * as readline from "node:readline/promises";
+import * as os from "node:os";
 
 const initializeApp = () => {
   let prefix = "--username=";
@@ -13,15 +14,27 @@ const initializeApp = () => {
     }
   }
   console.log(`Welcome to the File Manager, ${username}!`);
-  return username;
+  const initialDirectory = os.homedir();
+
+  return {
+    username: username,
+    currentDirectory: initialDirectory,
+  };
 };
 
 const handleExit = (username) => {
-  console.log(`\nThank you for using File Manager, ${username}, goodbye!`); // \n для новой строки на всякий случай
+  console.log(`\nThank you for using File Manager, ${username}, goodbye!`);
   process.exit(0);
 };
 
-const username = initializeApp();
+const initialState = initializeApp();
+let currentDirectory = initialState.currentDirectory;
+const username = initialState.username;
+
+const printCurrentDirectoryPrompt = () => {
+  output.write(`\nYou are currently in ${currentDirectory}\n`);
+  output.write("> ");
+};
 
 const rl = readline.createInterface({ input, output, prompt: "" });
 
@@ -29,7 +42,7 @@ process.on("SIGINT", () => {
   handleExit(username);
 });
 
-output.write("> ");
+printCurrentDirectoryPrompt();
 
 rl.on("line", (line) => {
   const trimmedLine = line.trim();
@@ -37,8 +50,8 @@ rl.on("line", (line) => {
     rl.close();
     return;
   }
-  console.log(`Unknown command: ${trimmedLine}`);
-  output.write("> ");
+  console.log(`Invalid input: ${trimmedLine}`);
+  printCurrentDirectoryPrompt();
 });
 
 rl.on("close", () => {
