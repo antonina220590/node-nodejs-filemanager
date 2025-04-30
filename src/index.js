@@ -2,6 +2,8 @@ import { argv, stdin as input, stdout as output } from "node:process";
 import * as readline from "node:readline/promises";
 import * as os from "node:os";
 
+import { handleUp } from "./handlers/navigation.js";
+
 const initializeApp = () => {
   let prefix = "--username=";
   let username = "Dear Guest";
@@ -46,12 +48,23 @@ printCurrentDirectoryPrompt();
 
 rl.on("line", (line) => {
   const trimmedLine = line.trim();
-  if (trimmedLine === ".exit") {
-    rl.close();
-    return;
+  try {
+    if (trimmedLine === "up") {
+      const newDirectory = handleUp(currentDirectory);
+      currentDirectory = newDirectory;
+    } else if (trimmedLine === ".exit") {
+      rl.close();
+      return;
+    } else {
+      console.log(`\nInvalid input: ${trimmedLine}`);
+    }
+  } catch (error) {
+    console.error("\nOperation failed", error);
+  } finally {
+    if (trimmedLine !== ".exit") {
+      printCurrentDirectoryPrompt();
+    }
   }
-  console.log(`Invalid input: ${trimmedLine}`);
-  printCurrentDirectoryPrompt();
 });
 
 rl.on("close", () => {
