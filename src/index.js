@@ -2,7 +2,8 @@ import { argv, stdin as input, stdout as output } from "node:process";
 import * as readline from "node:readline/promises";
 import * as os from "node:os";
 
-import { handleUp } from "./handlers/navigation.js";
+import { handleUp } from "./handlers/navigationUp.js";
+import { handleCd } from "./handlers/navigationCd.js";
 
 const initializeApp = () => {
   let prefix = "--username=";
@@ -46,22 +47,44 @@ process.on("SIGINT", () => {
 
 printCurrentDirectoryPrompt();
 
-rl.on("line", (line) => {
+rl.on("line", async (line) => {
   const trimmedLine = line.trim();
+  const parts = trimmedLine.split(" ").filter((part) => part !== "");
+  const command = parts[0] || "";
+  const args = parts.slice(1);
+
   try {
-    if (trimmedLine === "up") {
-      const newDirectory = handleUp(currentDirectory);
-      currentDirectory = newDirectory;
-    } else if (trimmedLine === ".exit") {
+    if (command === "up") {
+      if (args.length > 0) {
+        throw new Error(
+          'Invalid input: "up" command does not accept arguments.'
+        );
+      }
+      currentDirectory = handleUp(currentDirectory);
+    } else if (command === "cd") {
+      if (args.length !== 1) {
+        throw new Error(
+          'Invalid input: "cd" command requires exactly one path argument.'
+        );
+      }
+      currentDirectory = await handleCd(currentDirectory, args[0]);
+    } else if (command === ".exit") {
       rl.close();
       return;
+    } else if (command === "") {
     } else {
-      console.log(`\nInvalid input: ${trimmedLine}`);
+      throw new Error(
+        `Invalid input: Unknown command "${command || "(empty)"}"`
+      );
     }
   } catch (error) {
-    console.error("\nOperation failed", error);
+    if (error.message.startsWith("Invalid input")) {
+      console.log(`\n${error.message}`);
+    } else {
+      console.log("\nOperation failed");
+    }
   } finally {
-    if (trimmedLine !== ".exit") {
+    if (command !== ".exit") {
       printCurrentDirectoryPrompt();
     }
   }
