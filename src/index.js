@@ -4,6 +4,7 @@ import * as os from "node:os";
 
 import { handleUp } from "./handlers/navigationUp.js";
 import { handleCd } from "./handlers/navigationCd.js";
+import { handleLs } from "./handlers/navigationLs.js";
 
 const initializeApp = () => {
   let prefix = "--username=";
@@ -68,6 +69,12 @@ rl.on("line", async (line) => {
         );
       }
       currentDirectory = await handleCd(currentDirectory, args[0]);
+    } else if (command === "ls") {
+      if (args.length > 0)
+        throw new Error(
+          'Invalid input: "ls" command does not accept arguments.'
+        );
+      await handleLs(currentDirectory);
     } else if (command === ".exit") {
       rl.close();
       return;
