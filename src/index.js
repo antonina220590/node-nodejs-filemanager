@@ -2,9 +2,10 @@ import { argv, stdin as input, stdout as output } from "node:process";
 import * as readline from "node:readline/promises";
 import * as os from "node:os";
 
-import { handleUp } from "./handlers/navigationUp.js";
-import { handleCd } from "./handlers/navigationCd.js";
-import { handleLs } from "./handlers/navigationLs.js";
+import { handleUp } from "./handlers/navigation/navigationUp.js";
+import { handleCd } from "./handlers/navigation/navigationCd.js";
+import { handleLs } from "./handlers/navigation/navigationLs.js";
+import { handleCat } from "./handlers/fileOperations/handleCat.js";
 
 const initializeApp = () => {
   let prefix = "--username=";
@@ -75,6 +76,13 @@ rl.on("line", async (line) => {
           'Invalid input: "ls" command does not accept arguments.'
         );
       await handleLs(currentDirectory);
+    } else if (command === "cat") {
+      if (args.length !== 1 || !args[0]) {
+        throw new Error(
+          'Invalid input: "cat" command requires exactly one file path argument.'
+        );
+      }
+      await handleCat(currentDirectory, args[0]);
     } else if (command === ".exit") {
       rl.close();
       return;
