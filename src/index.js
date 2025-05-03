@@ -6,6 +6,7 @@ import { handleUp } from "./handlers/navigation/navigationUp.js";
 import { handleCd } from "./handlers/navigation/navigationCd.js";
 import { handleLs } from "./handlers/navigation/navigationLs.js";
 import { handleCat } from "./handlers/fileOperations/handleCat.js";
+import { handleAdd } from "./handlers/fileOperations/handleAdd.js";
 
 const initializeApp = () => {
   let prefix = "--username=";
@@ -83,6 +84,13 @@ rl.on("line", async (line) => {
         );
       }
       await handleCat(currentDirectory, args[0]);
+    } else if (command === "add") {
+      if (args.length !== 1 || !args[0]) {
+        throw new Error(
+          'Invalid input: "add" command requires exactly one filename argument.'
+        );
+      }
+      await handleAdd(currentDirectory, args[0]);
     } else if (command === ".exit") {
       rl.close();
       return;
