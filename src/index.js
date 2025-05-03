@@ -7,6 +7,7 @@ import { handleCd } from "./handlers/navigation/navigationCd.js";
 import { handleLs } from "./handlers/navigation/navigationLs.js";
 import { handleCat } from "./handlers/fileOperations/handleCat.js";
 import { handleAdd } from "./handlers/fileOperations/handleAdd.js";
+import { handleMkdir } from "./handlers/fileOperations/handleMkdir.js";
 
 const initializeApp = () => {
   let prefix = "--username=";
@@ -91,6 +92,13 @@ rl.on("line", async (line) => {
         );
       }
       await handleAdd(currentDirectory, args[0]);
+    } else if (command === "mkdir") {
+      if (args.length !== 1 || !args[0]) {
+        throw new Error(
+          'Invalid input: "mkdir" command requires exactly one directory name argument.'
+        );
+      }
+      await handleMkdir(currentDirectory, args[0]);
     } else if (command === ".exit") {
       rl.close();
       return;
