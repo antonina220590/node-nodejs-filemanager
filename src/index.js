@@ -8,6 +8,7 @@ import { handleLs } from "./handlers/navigation/navigationLs.js";
 import { handleCat } from "./handlers/fileOperations/handleCat.js";
 import { handleAdd } from "./handlers/fileOperations/handleAdd.js";
 import { handleMkdir } from "./handlers/fileOperations/handleMkdir.js";
+import { handleRn } from "./handlers/fileOperations/handleRn.js";
 
 const initializeApp = () => {
   let prefix = "--username=";
@@ -99,6 +100,13 @@ rl.on("line", async (line) => {
         );
       }
       await handleMkdir(currentDirectory, args[0]);
+    } else if (command === "rn") {
+      if (args.length !== 2 || !args[0] || !args[1]) {
+        throw new Error(
+          'Invalid input: "rn" command requires source file and new filename arguments.'
+        );
+      }
+      await handleRn(currentDirectory, args[0], args[1]);
     } else if (command === ".exit") {
       rl.close();
       return;
