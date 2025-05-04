@@ -9,6 +9,7 @@ import { handleCat } from "./handlers/fileOperations/handleCat.js";
 import { handleAdd } from "./handlers/fileOperations/handleAdd.js";
 import { handleMkdir } from "./handlers/fileOperations/handleMkdir.js";
 import { handleRn } from "./handlers/fileOperations/handleRn.js";
+import { handleCp } from "./handlers/fileOperations/handleCp.js";
 
 const initializeApp = () => {
   let prefix = "--username=";
@@ -107,6 +108,13 @@ rl.on("line", async (line) => {
         );
       }
       await handleRn(currentDirectory, args[0], args[1]);
+    } else if (command === "cp") {
+      if (args.length !== 2 || !args[0] || !args[1]) {
+        throw new Error(
+          'Invalid input: "cp" command requires source file and destination directory arguments.'
+        );
+      }
+      await handleCp(currentDirectory, args[0], args[1]);
     } else if (command === ".exit") {
       rl.close();
       return;
