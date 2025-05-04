@@ -11,6 +11,7 @@ import { handleMkdir } from "./handlers/fileOperations/handleMkdir.js";
 import { handleRn } from "./handlers/fileOperations/handleRn.js";
 import { handleCp } from "./handlers/fileOperations/handleCp.js";
 import { handleMv } from "./handlers/fileOperations/handleMv.js";
+import { handleRm } from "./handlers/fileOperations/handleRm.js";
 
 const initializeApp = () => {
   let prefix = "--username=";
@@ -123,6 +124,13 @@ rl.on("line", async (line) => {
         );
       }
       await handleMv(currentDirectory, args[0], args[1]);
+    } else if (command === "rm") {
+      if (args.length !== 1 || !args[0]) {
+        throw new Error(
+          'Invalid input: "rm" command requires exactly one file path argument.'
+        );
+      }
+      await handleRm(currentDirectory, args[0]);
     } else if (command === ".exit") {
       rl.close();
       return;
