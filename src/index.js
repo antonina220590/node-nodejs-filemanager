@@ -14,6 +14,8 @@ import { handleMv } from "./handlers/fileOperations/handleMv.js";
 import { handleRm } from "./handlers/fileOperations/handleRm.js";
 import { handleOs } from "./handlers/osInfo/handleOs.js";
 import { handleHash } from "./handlers/fileOperations/handleHash.js";
+import { handleCompress } from "./handlers/fileOperations/handleCompress.js";
+import { handleDecompress } from "./handlers/fileOperations/handleDecompress.js";
 
 const initializeApp = () => {
   let prefix = "--username=";
@@ -148,6 +150,20 @@ rl.on("line", async (line) => {
       }
 
       await handleHash(currentDirectory, args[0]);
+    } else if (command === "compress") {
+      if (args.length !== 2 || !args[0] || !args[1]) {
+        throw new Error(
+          'Invalid input: "compress" command requires source file and destination path arguments.'
+        );
+      }
+      await handleCompress(currentDirectory, args[0], args[1]);
+    } else if (command === "decompress") {
+      if (args.length !== 2 || !args[0] || !args[1]) {
+        throw new Error(
+          'Invalid input: "decompress" command requires source file and destination path arguments.'
+        );
+      }
+      await handleDecompress(currentDirectory, args[0], args[1]);
     } else if (command === ".exit") {
       rl.close();
       return;
