@@ -12,6 +12,7 @@ import { handleRn } from "./handlers/fileOperations/handleRn.js";
 import { handleCp } from "./handlers/fileOperations/handleCp.js";
 import { handleMv } from "./handlers/fileOperations/handleMv.js";
 import { handleRm } from "./handlers/fileOperations/handleRm.js";
+import { handleOs } from "./handlers/osInfo/handleOs.js";
 
 const initializeApp = () => {
   let prefix = "--username=";
@@ -131,6 +132,13 @@ rl.on("line", async (line) => {
         );
       }
       await handleRm(currentDirectory, args[0]);
+    } else if (command === "os") {
+      if (args.length !== 1 || !args[0] || !args[0].startsWith("--")) {
+        throw new Error(
+          'Invalid input: "os" command requires exactly one flag argument (e.g. --EOL).'
+        );
+      }
+      handleOs(args[0]);
     } else if (command === ".exit") {
       rl.close();
       return;
