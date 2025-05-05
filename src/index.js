@@ -13,6 +13,7 @@ import { handleCp } from "./handlers/fileOperations/handleCp.js";
 import { handleMv } from "./handlers/fileOperations/handleMv.js";
 import { handleRm } from "./handlers/fileOperations/handleRm.js";
 import { handleOs } from "./handlers/osInfo/handleOs.js";
+import { handleHash } from "./handlers/fileOperations/handleHash.js";
 
 const initializeApp = () => {
   let prefix = "--username=";
@@ -139,6 +140,14 @@ rl.on("line", async (line) => {
         );
       }
       handleOs(args[0]);
+    } else if (command === "hash") {
+      if (args.length !== 1 || !args[0]) {
+        throw new Error(
+          'Invalid input: "hash" command requires exactly one file path argument.'
+        );
+      }
+
+      await handleHash(currentDirectory, args[0]);
     } else if (command === ".exit") {
       rl.close();
       return;
