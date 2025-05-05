@@ -19,6 +19,26 @@ const handleOs = (flag) => {
       });
       break;
 
+    case "--homedir":
+      const homeDirectory = os.homedir();
+      console.log(`Home Directory: ${homeDirectory}`);
+      break;
+
+    case "--username":
+      try {
+        const userInfo = os.userInfo();
+        console.log(`System Username: ${userInfo.username}`);
+      } catch (error) {
+        console.error("Failed to retrieve system user info:", error);
+        throw new Error("Operation failed");
+      }
+      break;
+
+    case "--architecture":
+      const architecture = os.arch();
+      console.log(`CPU Architecture: ${architecture}`);
+      break;
+
     default:
       throw new Error(`Invalid input`);
   }
