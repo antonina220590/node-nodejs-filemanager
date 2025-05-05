@@ -2,20 +2,8 @@ import { argv, stdin as input, stdout as output } from "node:process";
 import * as readline from "node:readline/promises";
 import * as os from "node:os";
 
-import { handleUp } from "./handlers/navigation/navigationUp.js";
-import { handleCd } from "./handlers/navigation/navigationCd.js";
-import { handleLs } from "./handlers/navigation/navigationLs.js";
-import { handleCat } from "./handlers/fileOperations/handleCat.js";
-import { handleAdd } from "./handlers/fileOperations/handleAdd.js";
-import { handleMkdir } from "./handlers/fileOperations/handleMkdir.js";
-import { handleRn } from "./handlers/fileOperations/handleRn.js";
-import { handleCp } from "./handlers/fileOperations/handleCp.js";
-import { handleMv } from "./handlers/fileOperations/handleMv.js";
-import { handleRm } from "./handlers/fileOperations/handleRm.js";
-import { handleOs } from "./handlers/osInfo/handleOs.js";
-import { handleHash } from "./handlers/fileOperations/handleHash.js";
-import { handleCompress } from "./handlers/fileOperations/handleCompress.js";
-import { handleDecompress } from "./handlers/fileOperations/handleDecompress.js";
+import { parseInput } from "./cli/parser.js";
+import { routeCommand } from "./cli/router.js";
 
 const initializeApp = () => {
   let prefix = "--username=";
@@ -61,118 +49,18 @@ printCurrentDirectoryPrompt();
 
 rl.on("line", async (line) => {
   const trimmedLine = line.trim();
-  const parts = trimmedLine.split(" ").filter((part) => part !== "");
-  const command = parts[0] || "";
-  const args = parts.slice(1);
-
+  if (trimmedLine === ".exit") {
+    rl.close();
+    return;
+  }
+  const parsed = parseInput(trimmedLine);
+  if (parsed.command === "") {
+    printCurrentDirectoryPrompt();
+    return;
+  }
   try {
-    if (command === "up") {
-      if (args.length > 0) {
-        throw new Error(
-          'Invalid input: "up" command does not accept arguments.'
-        );
-      }
-      currentDirectory = handleUp(currentDirectory);
-    } else if (command === "cd") {
-      if (args.length !== 1) {
-        throw new Error(
-          'Invalid input: "cd" command requires exactly one path argument.'
-        );
-      }
-      currentDirectory = await handleCd(currentDirectory, args[0]);
-    } else if (command === "ls") {
-      if (args.length > 0)
-        throw new Error(
-          'Invalid input: "ls" command does not accept arguments.'
-        );
-      await handleLs(currentDirectory);
-    } else if (command === "cat") {
-      if (args.length !== 1 || !args[0]) {
-        throw new Error(
-          'Invalid input: "cat" command requires exactly one file path argument.'
-        );
-      }
-      await handleCat(currentDirectory, args[0]);
-    } else if (command === "add") {
-      if (args.length !== 1 || !args[0]) {
-        throw new Error(
-          'Invalid input: "add" command requires exactly one filename argument.'
-        );
-      }
-      await handleAdd(currentDirectory, args[0]);
-    } else if (command === "mkdir") {
-      if (args.length !== 1 || !args[0]) {
-        throw new Error(
-          'Invalid input: "mkdir" command requires exactly one directory name argument.'
-        );
-      }
-      await handleMkdir(currentDirectory, args[0]);
-    } else if (command === "rn") {
-      if (args.length !== 2 || !args[0] || !args[1]) {
-        throw new Error(
-          'Invalid input: "rn" command requires source file and new filename arguments.'
-        );
-      }
-      await handleRn(currentDirectory, args[0], args[1]);
-    } else if (command === "cp") {
-      if (args.length !== 2 || !args[0] || !args[1]) {
-        throw new Error(
-          'Invalid input: "cp" command requires source file and destination directory arguments.'
-        );
-      }
-      await handleCp(currentDirectory, args[0], args[1]);
-    } else if (command === "mv") {
-      if (args.length !== 2 || !args[0] || !args[1]) {
-        throw new Error(
-          'Invalid input: "mv" command requires source file and destination directory arguments.'
-        );
-      }
-      await handleMv(currentDirectory, args[0], args[1]);
-    } else if (command === "rm") {
-      if (args.length !== 1 || !args[0]) {
-        throw new Error(
-          'Invalid input: "rm" command requires exactly one file path argument.'
-        );
-      }
-      await handleRm(currentDirectory, args[0]);
-    } else if (command === "os") {
-      if (args.length !== 1 || !args[0] || !args[0].startsWith("--")) {
-        throw new Error(
-          'Invalid input: "os" command requires exactly one flag argument (e.g. --EOL).'
-        );
-      }
-      handleOs(args[0]);
-    } else if (command === "hash") {
-      if (args.length !== 1 || !args[0]) {
-        throw new Error(
-          'Invalid input: "hash" command requires exactly one file path argument.'
-        );
-      }
-
-      await handleHash(currentDirectory, args[0]);
-    } else if (command === "compress") {
-      if (args.length !== 2 || !args[0] || !args[1]) {
-        throw new Error(
-          'Invalid input: "compress" command requires source file and destination path arguments.'
-        );
-      }
-      await handleCompress(currentDirectory, args[0], args[1]);
-    } else if (command === "decompress") {
-      if (args.length !== 2 || !args[0] || !args[1]) {
-        throw new Error(
-          'Invalid input: "decompress" command requires source file and destination path arguments.'
-        );
-      }
-      await handleDecompress(currentDirectory, args[0], args[1]);
-    } else if (command === ".exit") {
-      rl.close();
-      return;
-    } else if (command === "") {
-    } else {
-      throw new Error(
-        `Invalid input: Unknown command "${command || "(empty)"}"`
-      );
-    }
+    const result = await routeCommand(parsed, currentDirectory);
+    currentDirectory = result.newDirectory;
   } catch (error) {
     if (error.message.startsWith("Invalid input")) {
       console.log(`\n${error.message}`);
@@ -180,9 +68,7 @@ rl.on("line", async (line) => {
       console.log("\nOperation failed");
     }
   } finally {
-    if (command !== ".exit") {
-      printCurrentDirectoryPrompt();
-    }
+    printCurrentDirectoryPrompt();
   }
 });
 
